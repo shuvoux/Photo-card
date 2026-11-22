@@ -466,7 +466,50 @@ function readImageFile(file, onLoad, maxMb = 12) {
   reader.readAsDataURL(file);
 }
 
-function loadFromUrl(url, kind = 'image') {
+function blobToDataUrl(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error || new Error('Could not read image'));
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function fetchImageAsDataUrl(url, timeoutMs = 15000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, {
+      mode: 'cors',
+      credentials: 'omit',
+      signal: controller.signal
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const blob = await response.blob();
+    if (!/^image\//.test(blob.type || '')) throw new Error('Not an image');
+    if (blob.size > 25 * 1024 * 1024) throw new Error('Image too large');
+    return await blobToDataUrl(blob);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Turn a remote image into a local data URL so the preview and the PNG export
+ * never depend on the host sending CORS headers. Many image hosts do not, so
+ * fall back to a public image proxy that does.
+ */
+async function fetchRemoteImage(url) {
+  if (/^data:/i.test(url)) return url;
+  try {
+    return await fetchImageAsDataUrl(url);
+  } catch (err) {
+    const proxied = `https://wsrv.nl/?url=${encodeURIComponent(url)}`;
+    return fetchImageAsDataUrl(proxied, 20000);
+  }
+}
+
+async function loadFromUrl(url, kind = 'image') {
   const clean = url.trim();
   if (!clean) return;
   if (!/^(https?:|data:)/i.test(clean)) {
@@ -475,43 +518,50 @@ function loadFromUrl(url, kind = 'image') {
   }
 
   if (kind === 'logo') {
-    state.media.logo = clean;
+    setSaveStatus('Loading logo…', true);
+    let source = clean;
+    try {
+      source = await fetchRemoteImage(clean);
+      toast('Logo added.');
+    } catch (err) {
+      toast('Logo added, but this host may block the PNG export. Upload the file instead.', 'error');
+    }
+    state.media.logo = source;
     state.media.logoSource = 'url';
     state.media.logoUrlValue = clean;
     renderPreview();
     renderMediaInputs();
     saveState();
-    toast('Logo added.');
     return;
   }
 
   if (kind === 'ad') {
-    state.media.ad = clean;
+    setSaveStatus('Loading ad banner…', true);
+    let source = clean;
+    try {
+      source = await fetchRemoteImage(clean);
+      toast('Ad banner added.');
+    } catch (err) {
+      toast('Ad added, but this host may block the PNG export. Upload the file instead.', 'error');
+    }
+    state.media.ad = source;
     state.media.adSource = 'url';
     state.media.adUrlValue = clean;
     renderPreview();
     renderMediaInputs();
     saveState();
-    toast('Ad banner added.');
     return;
   }
 
-  const probe = new Image();
-  probe.crossOrigin = 'anonymous';
-  probe.onload = () => {
-    setImage(clean, { source: 'url', cors: true, url: clean });
+  setSaveStatus('Loading image…', true);
+  try {
+    const source = await fetchRemoteImage(clean);
+    setImage(source, { source: 'url', cors: true, url: clean });
     toast('Photo loaded.');
-  };
-  probe.onerror = () => {
-    const plain = new Image();
-    plain.onload = () => {
-      setImage(clean, { source: 'url', cors: false, url: clean });
-      toast('Photo loaded, but this host may block PNG export. Upload the file instead.', 'error');
-    };
-    plain.onerror = () => toast('That image could not be loaded.', 'error');
-    plain.src = clean;
-  };
-  probe.src = clean;
+  } catch (err) {
+    setImage(clean, { source: 'url', cors: false, url: clean });
+    toast('Photo loaded, but this host blocks downloads. Upload the photo file for a guaranteed PNG.', 'error');
+  }
 }
 
 /* -------------------------------------------------------------------- drag */

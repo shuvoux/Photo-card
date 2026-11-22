@@ -19,7 +19,8 @@ python -m http.server 8000
 - **One BanglaTopic design** — a 1080 × 1350 (4:5) brand card, ready to use
 - **Live preview** scaled to fit any screen
 - **Photo controls** — upload or URL, cover/contain/fill, zoom, horizontal/vertical position, and drag-to-reposition directly on the preview
-- **Logo support** — upload or URL, replaces the built-in Bangla Topic wordmark
+- **Built-in BanglaTopic logo** — the official wordmark is always there; upload a logo (or paste a URL) to replace it, and remove it to get the wordmark back
+- **Photo and banner URLs** — remote images are downloaded and embedded as local data URLs, with an image-proxy fallback, so they appear in the exported PNG even when the host blocks cross-origin canvas access
 - **Typography** — 11 Google Fonts including four with full Bengali coverage (Hind Siliguri, Noto Serif Bengali, Baloo Da 2, Anek Bangla)
 - **Headline size** — nudge the headline scale from 70% to 160%, on top of automatic fit
 - **Theme colors** — accent, background and text colors
@@ -32,7 +33,7 @@ python -m http.server 8000
 
 ## The design
 
-BanglaTopic: full-width photo, red category badge, large centred Bangla headline on black with a red glow, a red call-to-action pill, the domain, the Bangla Topic wordmark and the bottom tagline. Add a logo to replace the built-in wordmark, and the bottom tagline is hidden automatically when an ad strip is active.
+BanglaTopic: full-width photo, red category badge, large centred Bangla headline on black with a red glow, a red call-to-action pill, the domain, the Bangla Topic wordmark and the bottom tagline. Upload a logo to replace the built-in wordmark. When an ad strip is active the tagline hides and the footer moves up so the banner sits flush inside the card, and the banner is included in the PNG export.
 
 ## Keyboard-free workflow
 
@@ -45,7 +46,9 @@ BanglaTopic: full-width photo, red category badge, large centred Bangla headline
 ## Notes
 
 - Text longer than a layout can hold is automatically reduced down to a readable minimum. Very long copy may still be clipped, so keep headlines tight.
-- Remote image URLs only export cleanly when the host sends CORS headers. If a host blocks export, upload the image file instead.
+- Images added by URL are fetched and stored as local data URLs, so they are baked into the PNG export. If the host blocks `fetch` (no CORS headers), the app retries through the `wsrv.nl` image proxy; the first proxy fetch can take a few seconds.
+- The advert banner is part of the card, not a link. The 110 px strip is included in the downloaded PNG exactly as it appears in the preview.
+- Browsers like Chrome may ask for permission or block downloads when you export several cards in a row. Allow multiple downloads for this site, or use a fresh tab.
 - Saved photos are stored in `localStorage`; very large images may exceed the browser quota, in which case the app keeps your text settings and asks you to re-add the photo.
 
 ## Tech

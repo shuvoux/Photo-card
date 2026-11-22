@@ -109,11 +109,7 @@ export const templates = [
           </div>
           <div class="bt-brand">
             <span class="logo-wrap bt-logo"><img src="{{logo}}" alt=""></span>
-            <span class="bt-fallback">
-              <span class="bt-mark">ব</span>
-              <span class="bt-name">বাংলা</span>
-              <span class="bt-topic">Topic</span>
-            </span>
+            <span class="bt-fallback"><img src="assets/banglatopic-logo.png" alt="বাংলা Topic"></span>
           </div>
         </div>
         <div class="bt-tagline-wrap"><span class="bt-tagline">{{tagline}}</span></div>
@@ -134,9 +130,7 @@ export const templates = [
       .t-banglatopic .bt-logo { height: 64px; max-width: 300px; }
       .t-banglatopic .bt-logo img { height: 64px; width: auto; }
       .t-banglatopic .bt-fallback { display: flex; align-items: center; }
-      .t-banglatopic .bt-mark { width: 56px; height: 56px; border-radius: 14px; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 28px; font-weight: 800; margin-right: 14px; }
-      .t-banglatopic .bt-name { font-size: 38px; font-weight: 700; }
-      .t-banglatopic .bt-topic { margin-left: 9px; background: var(--accent); color: #fff; font-family: 'Inter', sans-serif; font-size: 36px; font-weight: 800; padding: 1px 10px 4px; border-radius: 2px; }
+      .t-banglatopic .bt-fallback img { height: 62px; width: auto; display: block; }
       .t-banglatopic .bt-tagline-wrap { position: absolute; left: 0; right: 0; bottom: 0; height: 104px; z-index: 2; border-top: 1px solid rgba(255,255,255,.16); display: flex; align-items: center; justify-content: center; }
       .t-banglatopic .bt-tagline { font-size: 25px; font-weight: 500; color: rgba(255,255,255,.92); letter-spacing: .01em; }
       .t-banglatopic.has-logo .bt-fallback { display: none; }
