@@ -14,6 +14,22 @@ python -m http.server 8000
 # then open http://localhost:8000
 ```
 
+## Deploy to Vercel
+
+This is a static site with no build step: Vercel serves the repository root as-is, so `index.html`, `app.js` and `assets/` work directly.
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/shuvoux/Photo-card)
+
+Or deploy from the command line:
+
+```bash
+npm i -g vercel   # once
+vercel login
+vercel --prod     # run inside this folder, then accept the defaults
+```
+
+When Vercel asks for a framework, choose **Other**. Leave the build command empty and keep the output directory as the repository root. After the project is connected to GitHub, every push to `main` deploys automatically.
+
 ## Features
 
 - **One BanglaTopic design** — a 1080 × 1350 (4:5) brand card, ready to use
